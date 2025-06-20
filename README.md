@@ -85,7 +85,7 @@ $data = db_all($pdo, 'SELECT * FROM users');
 ul(array_column($data, 'username'));
 ```
 
-🧪 [More Examples](https://exampe.com/microfy/)
+🧪 [More Examples](https://itnb.com/microfy/)
 
 ---
 
@@ -98,7 +98,7 @@ We welcome contributions! See [CONTRIBUTING.md](CONTRIBUTING.md) for details.
 
 ### 🔒 License
 
-**MIT License** — © 2024–2025 SirCode |
+**MIT License** — © 2024–2025 [SirCode](https://itnb.com/) |
 This project is not affiliated with or endorsed by the PHP Foundation.
 Use at your own risk — no warranties, no guarantees, just useful code.
 
