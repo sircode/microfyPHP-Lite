@@ -2,6 +2,8 @@
 
 **Minimal utility helpers for everyday PHP tasks**
 
+Status: EXPERIMENTAL
+
 ---
 
 ### 🧰 What is it?
