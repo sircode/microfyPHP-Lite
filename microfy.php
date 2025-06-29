@@ -372,17 +372,29 @@ function a($href, $text = null, $target = '', $class = '')
     return "<a href=\"$href\"$targetAttr$classAttr>$text</a>";
 }
 
-function html_table($array)
+function html_table($array, $class = '', $id = '')
 {
     if (empty($array)) return "<p><em>No data.</em></p>";
 
-    $html = "<table border='1' cellpadding='6' cellspacing='0'>";
-    $html .= "<tr>";
+    $idAttr = $id !== '' ? " id='" . htmlspecialchars($id) . "'" : '';
+
+    if ($class !== '') {
+        $tableTag = "<table{$idAttr} class='" . htmlspecialchars($class) . "'>";
+    } else {
+        $tableTag = "<table{$idAttr} border='1' cellpadding='6' cellspacing='0'>";
+    }
+
+    $html = $tableTag;
+
+    // Add table header
+    $html .= "<thead><tr>";
     foreach (array_keys($array[0]) as $col) {
         $html .= "<th>" . htmlspecialchars($col) . "</th>";
     }
-    $html .= "</tr>";
+    $html .= "</tr></thead>";
 
+    // Add table body
+    $html .= "<tbody>";
     foreach ($array as $row) {
         $html .= "<tr>";
         foreach ($row as $cell) {
@@ -390,8 +402,11 @@ function html_table($array)
         }
         $html .= "</tr>";
     }
+    $html .= "</tbody>";
 
-    return $html . "</table>";
+    $html .= "</table>";
+
+    return $html;
 }
 
 
