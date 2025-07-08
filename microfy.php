@@ -1,6 +1,35 @@
 <?php
 // microfy.php - generated
 
+// paths
+
+function climb_dir(string $path = null, int $levels = 1): string
+{
+    // 1) Figure out the starting path
+    if ($path === null) {
+        // debug_backtrace()[0] is this function, [1] is its caller
+        $trace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 2);
+        $path  = $trace[1]['file'] ?? __FILE__;
+    }
+
+    // 2) Normalize to a directory
+    $dir = is_dir($path)
+        ? rtrim($path, '/\\')
+        : dirname($path);
+
+    // 3) Climb up $levels times
+    while ($levels-- > 0) {
+        $parent = dirname($dir);
+        // if we’re already at the root, stop
+        if ($parent === $dir) {
+            break;
+        }
+        $dir = $parent;
+    }
+
+    return $dir;
+}
+
 // --- arrays.php ---
 // General array accessor
 function get_r(array $array, $key, $default = null)
@@ -147,7 +176,7 @@ function db_all(PDO $pdo, string $sql, array $params = [])
 {
     $stmt = $pdo->prepare($sql);
     $stmt->execute($params);
-    return $stmt->fetchAll();
+    return $stmt->fetchAll(PDO::FETCH_ASSOC); // Explicit associative array
 }
 //  Fetch a single row
 function db_one(PDO $pdo, string $sql, array $params = [])
@@ -372,7 +401,7 @@ function a($href, $text = null, $target = '', $class = '')
     return "<a href=\"$href\"$targetAttr$classAttr>$text</a>";
 }
 
-function html_table($array, $class = '', $id = '')
+function html_table_safe($array, $class = '', $id = '')
 {
     if (empty($array)) return "<p><em>No data.</em></p>";
 
@@ -408,6 +437,63 @@ function html_table($array, $class = '', $id = '')
 
     return $html;
 }
+
+/**
+ * An adjustable table builder: by default it escapes everything,
+ * but you can whitelist columns that contain pre-escaped HTML.
+ *
+ * @param array       $array          The row data
+ * @param string[]    $allow_raw_cols List of columns whose contents
+ *                                    are already safe HTML
+ * @param string      $class          Optional table class
+ * @param string      $id             Optional table id
+ * @return string     The generated HTML table
+ */
+
+function html_table(array $rows, array $allow_raw_cols = [], string $cssClass  = '', string $id = '')
+{
+    
+    $array = $rows;
+    $class = $cssClass ;    
+
+    if (empty($array)) {
+        return "<p><em>No data.</em></p>";
+    }
+
+    $idAttr = $id !== '' ? " id='" . htmlspecialchars($id, ENT_QUOTES, 'UTF-8') . "'" : '';
+    $tableTag = $class !== ''
+        ? "<table{$idAttr} class='" . htmlspecialchars($class, ENT_QUOTES, 'UTF-8') . "'>"
+        : "<table{$idAttr} border='1' cellpadding='6' cellspacing='0'>";
+
+    $html = $tableTag;
+    // header
+    $html .= "<thead><tr>";
+    foreach (array_keys($array[0]) as $col) {
+        $html .= "<th>" . htmlspecialchars($col, ENT_QUOTES, 'UTF-8') . "</th>";
+    }
+    $html .= "</tr></thead>";
+
+    // body
+    $html .= "<tbody>";
+    foreach ($array as $row) {
+        $html .= "<tr>";
+        foreach ($row as $col => $cell) {
+            if (in_array($col, $allow_raw_cols, true)) {
+                // output raw HTML for whitelisted columns
+                $html .= "<td>{$cell}</td>";
+            } else {
+                // escape everything else
+                $html .= "<td>" . htmlspecialchars($cell, ENT_QUOTES, 'UTF-8') . "</td>";
+            }
+        }
+        $html .= "</tr>";
+    }
+    $html .= "</tbody></table>";
+
+    return $html;
+}
+
+
 
 
 // --- other.php ---
