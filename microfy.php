@@ -1,5 +1,9 @@
 <?php
-// microfy.php - generated
+/**
+ * microfy.php
+ * v0.1.2 
+ * Author: SirCode
+ */
 
 // paths
 
