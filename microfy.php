@@ -1,7 +1,7 @@
 <?php
 /**
  * microfy.php
- * v0.1.2 
+ * v0.1.3 
  * Author: SirCode
  */
 
@@ -47,17 +47,17 @@ function v($arr, $key, $default = '')
     return $arr[$key] ?? $default;
 }
 
-function get($key, $default = '')
+function get_var($key, $default = '')
 {
     return v($_GET, $key, $default);
 }
 
-function post($key, $default = '')
+function post_var($key, $default = '')
 {
     return v($_POST, $key, $default);
 }
 
-function request($key, $default = '')
+function request_var($key, $default = '')
 {
     return $_POST[$key] ?? $_GET[$key] ?? $default; // optional: v(array_merge($_POST, $_GET), ...)
 }
@@ -148,6 +148,7 @@ function extract_vars(array $source, array $allow, string $prefix = ''): void
         $GLOBALS[$prefix . $key] = $source[$key] ?? '';
     }
 }
+
 
 // --- db.php ---
 // Connect using PDO
@@ -456,7 +457,7 @@ function html_table_safe($array, $class = '', $id = '')
 
 function html_table(array $rows, array $allow_raw_cols = [], string $cssClass  = '', string $id = '')
 {
-    
+
     $array = $rows;
     $class = $cssClass ;    
 
