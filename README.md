@@ -25,7 +25,7 @@ Forget bloated frameworks — `microfy.php` gives you practical tools with no se
 
 ### ✨ Features
 
-* **Request Shortcuts**: `get()`, `post()`, `_request()`, plus extract helpers.
+* **Request Shortcuts**: `get_var()`, `post_var()`, `_request_var()`, plus extract helpers.
 * **Debug Helpers**: `pp()`, `pd()`, `d()`, `log_pr()`, `log_vd()`, `mlog()`.
 * **Slugify**: Clean URL-friendly slugs from text.
 * **JSON Read**: `jsonf()` for quick file-based config/data.
@@ -59,7 +59,7 @@ Use `microfy.php` when you:
 3. Use any helper you need:
 
    ```php
-   $name = _get('name', 'guest');
+   $name = _get_var('name', 'guest');
    pp(['Hello' => $name]);
    log_vd($_SESSION, 'Session Data');
    ```
@@ -70,7 +70,7 @@ Use `microfy.php` when you:
 
 ```php
 // Request value with default
-$lang = _get('lang', 'en');
+$lang = _get_var('lang', 'en');
 
 // Pretty Print array and halt
 ppd($_POST);
