@@ -1,40 +1,21 @@
 <?php
+
 /**
+ * MicrofyPHP
  * microfy.php
- * v0.1.3 
+ * v0.1.4 
  * Author: SirCode
  */
 
 // paths
+namespace Sircode\Microfy;
+use DOMDocument;
+/**
+ * ──────────────────────────────────────────────────────────────────────────────
+ *   arrays.php
+ * ──────────────────────────────────────────────────────────────────────────────
+ */
 
-function climb_dir(string $path = null, int $levels = 1): string
-{
-    // 1) Figure out the starting path
-    if ($path === null) {
-        // debug_backtrace()[0] is this function, [1] is its caller
-        $trace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 2);
-        $path  = $trace[1]['file'] ?? __FILE__;
-    }
-
-    // 2) Normalize to a directory
-    $dir = is_dir($path)
-        ? rtrim($path, '/\\')
-        : dirname($path);
-
-    // 3) Climb up $levels times
-    while ($levels-- > 0) {
-        $parent = dirname($dir);
-        // if we’re already at the root, stop
-        if ($parent === $dir) {
-            break;
-        }
-        $dir = $parent;
-    }
-
-    return $dir;
-}
-
-// --- arrays.php ---
 // General array accessor
 function get_r(array $array, $key, $default = null)
 {
@@ -150,7 +131,13 @@ function extract_vars(array $source, array $allow, string $prefix = ''): void
 }
 
 
-// --- db.php ---
+
+/**
+ * ──────────────────────────────────────────────────────────────────────────────
+ *   db.php - General array accessor
+ * ──────────────────────────────────────────────────────────────────────────────
+ */
+
 // Connect using PDO
 function db_pdo($host, $dbname, $user, $pass, $charset = 'utf8mb4', $driver = 'mysql')
 {
@@ -227,9 +214,9 @@ function db_exec(PDO $pdo, string $sql, array $params = [])
     return $stmt->execute($params); // returns true/false
 }
 
-function db_exists(PDO $pdo, string $table, string $column, $value)
+function db_exists(PDO $pdo, string $html_table, string $column, $value)
 {
-    $sql = "SELECT 1 FROM `$table` WHERE `$column` = ? LIMIT 1";
+    $sql = "SELECT 1 FROM `$html_table` WHERE `$column` = ? LIMIT 1";
     $stmt = $pdo->prepare($sql);
     $stmt->execute([$value]);
     return $stmt->fetchColumn() !== false;
@@ -248,7 +235,13 @@ function db_mysqli($host, $user, $pass, $dbname, $port = 3306)
     return $mysqli;
 }
 
-// --- debug.php ---
+/**
+ * ──────────────────────────────────────────────────────────────────────────────
+ *   debug.php
+ * ──────────────────────────────────────────────────────────────────────────────
+ */
+
+
 /* 
 pp()	Pretty-print print_r()
 ppd()	Pretty-print + die
@@ -370,7 +363,11 @@ function debug_session()
 
 
 
-// --- env.php ---
+/**
+ * ──────────────────────────────────────────────────────────────────────────────
+ *   env.php
+ * ──────────────────────────────────────────────────────────────────────────────
+ */
 function env($key, $default = null)
 {
     return $_ENV[$key] ?? getenv($key) ?: $default;
@@ -389,9 +386,13 @@ function jsonf($file, $assoc = true)
     return json_decode($content, $assoc);
 }
 
-// --- html.php ---
-/* links */
 
+/**
+ * ──────────────────────────────────────────────────────────────────────────────
+ *   html.php
+ * ──────────────────────────────────────────────────────────────────────────────
+ */
+/* links */
 function a($href, $text = null, $target = '', $class = '')
 {
     if (!preg_match('#^https?://#', $href)) {
@@ -406,7 +407,7 @@ function a($href, $text = null, $target = '', $class = '')
     return "<a href=\"$href\"$targetAttr$classAttr>$text</a>";
 }
 
-function html_table_safe($array, $class = '', $id = '')
+function build_html_table_safe($array, $class = '', $id = '')
 {
     if (empty($array)) return "<p><em>No data.</em></p>";
 
@@ -455,11 +456,11 @@ function html_table_safe($array, $class = '', $id = '')
  * @return string     The generated HTML table
  */
 
-function html_table(array $rows, array $allow_raw_cols = [], string $cssClass  = '', string $id = '')
+function build_html_table(array $rows, array $allow_raw_cols = [], string $cssClass  = '', string $id = '')
 {
 
     $array = $rows;
-    $class = $cssClass ;    
+    $class = $cssClass;
 
     if (empty($array)) {
         return "<p><em>No data.</em></p>";
@@ -499,9 +500,104 @@ function html_table(array $rows, array $allow_raw_cols = [], string $cssClass  =
 }
 
 
+/**
+ * Universal table builder.
+ *
+ * @param array          $rows             List of rows (
+ *                                         either indexed arrays or associative arrays
+ *                                       )
+ * @param array|string[] $allow_raw_cols   Keys (for assoc rows) or column‑indexes 
+ *                                         (for indexed rows) to skip escaping
+ * @param array|string   $attrs            Either a string of CSS classes, or an array 
+ *                                         of HTML attributes (class, id, data-*)
+ * @return string
+ */
+function build_html_table_universal(
+    array $rows,
+    array $allow_raw_cols = [],
+    $attrs = []
+): string {
+    if (empty($rows)) {
+        return tag('p', tag('em', 'No data.'));
+    }
+
+    // Normalize $attrs into an attribute array
+    if (is_string($attrs)) {
+        $attrs = ['class' => $attrs];
+    }
+
+    // Decide if rows are associative or indexed
+    $first = reset($rows);
+    $isAssoc = array_keys($first) !== range(0, count($first) - 1);
+
+    // Build headers
+    if ($isAssoc) {
+        $headers = array_keys($first);
+    } else {
+        // indexed rows: numeric columns → use 1-based labels or empty
+        $headers = array_map(fn($i) => "Col{$i}", array_keys($first));
+    }
+    $thCells = array_map(fn($h) => tag('th', htmlspecialchars((string)$h)), $headers);
+    $thead   = tag('thead', tag('tr', $thCells));
+
+    // Build body
+    $bodyRows = [];
+    foreach ($rows as $row) {
+        $tds = [];
+        foreach ($headers as $i => $col) {
+            $cell = $isAssoc ? ($row[$col] ?? '') : ($row[$i] ?? '');
+            $key  = $isAssoc ? $col : $i;
+            $raw  = in_array($key, $allow_raw_cols, true);
+            $content = $raw
+                ? $cell
+                : htmlspecialchars((string)$cell, ENT_QUOTES);
+            $tds[] = tag('td', $content);
+        }
+        $bodyRows[] = tag('tr', $tds);
+    }
+    $tbody = tag('tbody', $bodyRows);
+
+    return tag('table', $thead . $tbody, $attrs);
+}
 
 
-// --- other.php ---
+
+/**
+ * ──────────────────────────────────────────────────────────────────────────────
+ *   other.php
+ * ──────────────────────────────────────────────────────────────────────────────
+ */
+
+
+function climb_dir(string $path = null, int $levels = 1): string
+{
+    // 1) Figure out the starting path
+    if ($path === null) {
+        // debug_backtrace()[0] is this function, [1] is its caller
+        $trace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 2);
+        $path  = $trace[1]['file'] ?? __FILE__;
+    }
+
+    // 2) Normalize to a directory
+    $dir = is_dir($path)
+        ? rtrim($path, '/\\')
+        : dirname($path);
+
+    // 3) Climb up $levels times
+    while ($levels-- > 0) {
+        $parent = dirname($dir);
+        // if we’re already at the root, stop
+        if ($parent === $dir) {
+            break;
+        }
+        $dir = $parent;
+    }
+
+    return $dir;
+}
+
+
+// --- list counter ---
 function c_list(array $items, $reset = false)
 {
     static $counter = 1;
@@ -539,7 +635,14 @@ function def($name, $value)
 
 
 
-// --- response.php ---
+
+
+/**
+ * ──────────────────────────────────────────────────────────────────────────────
+ *   response.php
+ * ──────────────────────────────────────────────────────────────────────────────
+ */
+
 function hsc($str)
 {
     echo htmlspecialchars($str);
@@ -564,7 +667,13 @@ function fail($msg = 'Error')
     json(['status' => 'fail', 'msg' => $msg]);
 }
 
-// --- strings.php ---
+
+/**
+ * ──────────────────────────────────────────────────────────────────────────────
+ *   strings.php
+ * ──────────────────────────────────────────────────────────────────────────────
+ */
+
 function slugify($string)
 {
     $string = strtolower(trim($string));
@@ -572,7 +681,13 @@ function slugify($string)
     return trim($string, '-');
 }
 
-// --- style.php ---
+
+/**
+ * ──────────────────────────────────────────────────────────────────────────────
+ *   style.php
+ * ──────────────────────────────────────────────────────────────────────────────
+ */
+
 /* Headings */
 function h($level, $text, $class = '')
 {
@@ -765,3 +880,265 @@ function c_str($text = '')
     static $counter = 1;
     return $counter++ . '. ' . $text;
 }
+
+/**
+ * ──────────────────────────────────────────────────────────────────────────────
+ *   html_helpers.php
+ * ──────────────────────────────────────────────────────────────────────────────
+ */
+
+
+
+// Core wrappers (you’d have defined these already)
+function tag(string $tag, $content = '', array $attrs = [], bool $selfClose = false): string
+{
+    $attrStrings = [];
+    foreach ($attrs as $k => $v) {
+        $attrStrings[] = sprintf('%s="%s"', $k, htmlspecialchars((string)$v, ENT_QUOTES));
+    }
+    $attrString = $attrStrings ? ' ' . implode(' ', $attrStrings) : '';
+    if ($selfClose) {
+        return "<{$tag}{$attrString} />";
+    }
+    if (is_array($content)) {
+        $content = implode('', $content);
+    }
+    return "<{$tag}{$attrString}>{$content}</{$tag}>";
+}
+
+function html_tag(string $tag, $content = '', array $attrs = [], bool $selfClose = false): string
+{
+    return tag($tag, $content, $attrs, $selfClose);
+}
+
+// Basic paired elements
+function html_html($content = '', array $attrs = []): string
+{
+    return html_tag('html', $content, $attrs);
+}
+function html_head($content = '', array $attrs = []): string
+{
+    return html_tag('head', $content, $attrs);
+}
+function html_body($content = '', array $attrs = []): string
+{
+    return html_tag('body', $content, $attrs);
+}
+function html_header($content = '', array $attrs = []): string
+{
+    return html_tag('header', $content, $attrs);
+}
+function html_footer($content = '', array $attrs = []): string
+{
+    return html_tag('footer', $content, $attrs);
+}
+function html_section($content = '', array $attrs = []): string
+{
+    return html_tag('section', $content, $attrs);
+}
+function html_article($content = '', array $attrs = []): string
+{
+    return html_tag('article', $content, $attrs);
+}
+function html_nav($content = '', array $attrs = []): string
+{
+    return html_tag('nav', $content, $attrs);
+}
+function html_aside($content = '', array $attrs = []): string
+{
+    return html_tag('aside', $content, $attrs);
+}
+
+function html_div($content = '', array $attrs = []): string
+{
+    return html_tag('div', $content, $attrs);
+}
+function html_span($content = '', array $attrs = []): string
+{
+    return html_tag('span', $content, $attrs);
+}
+
+function html_h1($content = '', array $attrs = []): string
+{
+    return html_tag('h1', $content, $attrs);
+}
+function html_h2($content = '', array $attrs = []): string
+{
+    return html_tag('h2', $content, $attrs);
+}
+function html_h3($content = '', array $attrs = []): string
+{
+    return html_tag('h3', $content, $attrs);
+}
+function html_h4($content = '', array $attrs = []): string
+{
+    return html_tag('h4', $content, $attrs);
+}
+function html_h5($content = '', array $attrs = []): string
+{
+    return html_tag('h5', $content, $attrs);
+}
+function html_h6($content = '', array $attrs = []): string
+{
+    return html_tag('h6', $content, $attrs);
+}
+
+function html_p($content = '', array $attrs = []): string
+{
+    return html_tag('p', htmlspecialchars((string)$content), $attrs);
+}
+function html_blockquote($content = '', array $attrs = []): string
+{
+    return html_tag('blockquote', $content, $attrs);
+}
+function html_pre($content = '', array $attrs = []): string
+{
+    return html_tag('pre', htmlspecialchars((string)$content), $attrs);
+}
+function html_code($content = '', array $attrs = []): string
+{
+    return html_tag('code', htmlspecialchars((string)$content), $attrs);
+}
+
+function html_ul(array $items, array $attrs = []): string
+{
+    $lis = array_map(fn($i) => tag('li', $i), $items);
+    return html_tag('ul', $lis, $attrs);
+}
+function html_ol(array $items, array $attrs = []): string
+{
+    $lis = array_map(fn($i) => tag('li', $i), $items);
+    return html_tag('ol', $lis, $attrs);
+}
+function html_li($content = '', array $attrs = []): string
+{
+    return html_tag('li', $content, $attrs);
+}
+
+function html_dl(array $terms, array $attrs = []): string
+{
+    // $terms = [['term'=>'T','desc'=>'D'], ...]
+    $children = [];
+    foreach ($terms as $t) {
+        $children[] = tag('dt', htmlspecialchars((string)$t['term']));
+        $children[] = tag('dd', htmlspecialchars((string)$t['desc']));
+    }
+    return html_tag('dl', $children, $attrs);
+}
+
+// Table elements
+function html_table($content = '', array $attrs = []): string
+{
+    return html_tag('table', $content, $attrs);
+}
+function html_thead($content = '', array $attrs = []): string
+{
+    return html_tag('thead', $content, $attrs);
+}
+function html_tbody($content = '', array $attrs = []): string
+{
+    return html_tag('tbody', $content, $attrs);
+}
+function html_tr($content = '', array $attrs = []): string
+{
+    return html_tag('tr', $content, $attrs);
+}
+function html_th($content = '', array $attrs = []): string
+{
+    return html_tag('th', $content, $attrs);
+}
+function html_td($content = '', array $attrs = []): string
+{
+    return html_tag('td', $content, $attrs);
+}
+
+
+
+// Form elements
+function html_form($content = '', array $attrs = []): string
+{
+    return html_tag('form', $content, $attrs);
+}
+function html_label($content = '', array $attrs = []): string
+{
+    return html_tag('label', htmlspecialchars((string)$content), $attrs);
+}
+function html_input(array $attrs = []): string
+{
+    return html_tag('input', '', $attrs, true);
+}
+function html_textarea($content = '', array $attrs = []): string
+{
+    return html_tag('textarea', htmlspecialchars((string)$content), $attrs);
+}
+function html_select(array $options, array $attrs = []): string
+{
+    $opts = [];
+    foreach ($options as $value => $text) {
+        $opts[] = tag('option', htmlspecialchars((string)$text), ['value' => (string)$value]);
+    }
+    return html_tag('select', $opts, $attrs);
+}
+function html_button($content = '', array $attrs = []): string
+{
+    return html_tag('button', $content, $attrs);
+}
+
+// Self‑closing elements
+function html_br(array $attrs = []): string
+{
+    return html_tag('br', '', $attrs, true);
+}
+function html_hr(array $attrs = []): string
+{
+    return html_tag('hr', '', $attrs, true);
+}
+function html_img(array $attrs = []): string
+{
+    return html_tag('img', '', $attrs, true);
+}
+function html_meta(array $attrs = []): string
+{
+    return html_tag('meta', '', $attrs, true);
+}
+function html_link(array $attrs = []): string
+{
+    return html_tag('link', '', $attrs, true);
+}
+function html_script($content = '', array $attrs = []): string
+{
+    return html_tag('script', $content, $attrs);
+}
+function html_style($content = '', array $attrs = []): string
+{
+    return html_tag('style', $content, $attrs);
+}
+
+/**
+ * Pretty‑print a chunk of HTML.
+ *
+ * @param string $html Unformatted HTML fragment (returned by your helpers).
+ * @return string Formatted HTML with line breaks and indentation.
+ */
+function pretty_html(string $html): string
+{
+    $dom = new DOMDocument();
+
+    // Tidy up whitespace and force formatting
+    $dom->preserveWhiteSpace = false;
+    $dom->formatOutput       = true;
+
+    // Load fragment (use HTML-ENTITIES hack for UTF‑8)
+    @$dom->loadHTML(
+        '<?xml encoding="utf-8"?>'
+            . $html,
+        LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD
+    );
+
+    // Save and strip the XML declaration
+    $out = $dom->saveHTML();
+    return preg_replace('/^<\?xml.*?\?>\s*/', '', $out);
+}
+
+
+
