@@ -1,7 +1,7 @@
 <?php
 
 /**
- * MicrofyPHP
+ * microfyPHP
  * microfy.php
  * v0.1.4 
  * Author: SirCode
@@ -130,8 +130,6 @@ function extract_vars(array $source, array $allow, string $prefix = ''): void
     }
 }
 
-
-
 /**
  * ──────────────────────────────────────────────────────────────────────────────
  *   db.php - General array accessor
@@ -159,9 +157,6 @@ function db_pdo($host, $dbname, $user, $pass, $charset = 'utf8mb4', $driver = 'm
         dd("PDO Connection failed: " . $e->getMessage());
     }
 }
-
-
-
 
 // Fetch all rows from a query (PDO version)
 function db_all(PDO $pdo, string $sql, array $params = [])
@@ -633,10 +628,6 @@ function def($name, $value)
 }
 
 
-
-
-
-
 /**
  * ──────────────────────────────────────────────────────────────────────────────
  *   response.php
@@ -647,8 +638,6 @@ function hsc($str)
 {
     echo htmlspecialchars($str);
 }
-
-
 
 function json($data)
 {
@@ -886,8 +875,6 @@ function c_str($text = '')
  *   html_helpers.php
  * ──────────────────────────────────────────────────────────────────────────────
  */
-
-
 
 // Core wrappers (you’d have defined these already)
 function tag(string $tag, $content = '', array $attrs = [], bool $selfClose = false): string
