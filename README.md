@@ -80,6 +80,17 @@ Or use the `e_` prefixed shortcut:
 e_p("Hello");
 ```
 
+or use:
+```php
+e(hsc("Hello"), br(), h(2, "Title"));
+```
+
+instead of
+```php
+hsc("Hello");
+echo br();
+echo h(2, "Title");
+```
 
 ### 📌 When to Use microfy.php
 
