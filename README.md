@@ -33,6 +33,13 @@ Forget bloated frameworks — `microfy.php` gives you practical tools with no se
 * **Array Utils**: `get_r()` for safe access.
 * **Database**: `db_pdo()`, `db_all()`, `db_exists()` — simple and safe.
 * **Auto Titles + Lists**: `c_str()`, `c_list()` for numbered docs or steps.
+* **HTML Builders**: Quickly create semantic HTML with helpers like:
+  `html_div()`, `html_section()`, `html_h1()`, `html_p()`,  
+  `html_ul()`, `html_li()`, `html_form()`, `html_input()`,  
+  `html_table()`, `html_tr()`, `html_td()`, `html_button()`, etc.
+* **Low-level Control**: Use `tag()` or `html_tag()` to build any tag with attributes.
+* **Pretty Output**: Format HTML fragments with `pretty_html()` for debugging or inspection.
+
 
 ---
 
