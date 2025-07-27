@@ -165,7 +165,7 @@ Use at your own risk — no warranties, no guarantees, just useful code.
 ### 📦 Also Available as Object-Oriented Version
 
 If you prefer a **class-based approach**, check out
-👉 [`MicrofyClass.php`](https://github.com/sircode/MicrofyClass.php) — same helper functions, accessible via `Microfy::`.
+👉 [`microfyPHP (OOP)`](https://github.com/sircode/microfyPHP) — same helper functions, accessible via `Microfy::`.
 
 ---
 
