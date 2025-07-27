@@ -1,15 +1,16 @@
 <?php
 
 /**
- * microfyPHP
+ * MicrofyPHP
  * microfy.php
- * v0.1.4 
+ * v0.1.5
  * Author: SirCode
  */
 
 // paths optional
-//namespace Sircode\Microfy;
-//use DOMDocument;
+// namespace Sircode\Microfy;
+// use DOMDocument;
+
 /**
  * ──────────────────────────────────────────────────────────────────────────────
  *   arrays.php
@@ -54,7 +55,7 @@ function input_vars(array $keys, array $source, string $prefix = ''): array
 
     return $result;
 }
-//input_vars aliases 
+//input_vars aliases
 function get_vars(array $keys, string $prefix = ''): array
 {
     return input_vars($keys, $_GET, $prefix);
@@ -70,7 +71,6 @@ function req_vars(array $keys, string $prefix = ''): array
     return input_vars($keys, $_REQUEST, $prefix);
 }
 
-
 /* get_vars_prefixed */
 
 function get_vars_prefixed(array $keys): array
@@ -78,8 +78,6 @@ function get_vars_prefixed(array $keys): array
     return get_vars($keys, 'get_');
 }
 extract(get_vars_prefixed(['path', 'id']));
-
-
 
 function input_all(array $map, array $source): array
 {
@@ -96,13 +94,12 @@ function input_all(array $map, array $source): array
 
         // Treat empty string as "no value"
         $result[$varName] = (isset($source[$key]) && $source[$key] !== '')
-            ? $source[$key]
-            : $default;
+        ? $source[$key]
+        : $default;
     }
 
     return $result;
 }
-
 
 /* get_all  post_all req_all */
 
@@ -121,7 +118,6 @@ function req_all(array $map): array
     return input_all($map, $_REQUEST);
 }
 
-
 //Hybrid auto-extract with a whitelist
 function extract_vars(array $source, array $allow, string $prefix = ''): void
 {
@@ -132,7 +128,7 @@ function extract_vars(array $source, array $allow, string $prefix = ''): void
 
 /**
  * ──────────────────────────────────────────────────────────────────────────────
- *   db.php - General array accessor
+ *   db.php
  * ──────────────────────────────────────────────────────────────────────────────
  */
 
@@ -192,7 +188,6 @@ function db_count(PDO $pdo, string $sql, array $params = [])
     return (int) db_val($pdo, $sql, $params);
 }
 
-
 /* db_val() – Fetch a single value (e.g. COUNT, name, ID) */
 
 function db_val(PDO $pdo, string $sql, array $params = [])
@@ -202,7 +197,6 @@ function db_val(PDO $pdo, string $sql, array $params = [])
     return $stmt->fetchColumn(); // returns scalar or false
 }
 
-
 function db_exec(PDO $pdo, string $sql, array $params = [])
 {
     $stmt = $pdo->prepare($sql);
@@ -211,12 +205,11 @@ function db_exec(PDO $pdo, string $sql, array $params = [])
 
 function db_exists(PDO $pdo, string $html_table, string $column, $value)
 {
-    $sql = "SELECT 1 FROM `$html_table` WHERE `$column` = ? LIMIT 1";
+    $sql  = "SELECT 1 FROM `$html_table` WHERE `$column` = ? LIMIT 1";
     $stmt = $pdo->prepare($sql);
     $stmt->execute([$value]);
     return $stmt->fetchColumn() !== false;
 }
-
 
 // --- Connect using MySQLi ---
 function db_mysqli($host, $user, $pass, $dbname, $port = 3306)
@@ -236,20 +229,24 @@ function db_mysqli($host, $user, $pass, $dbname, $port = 3306)
  * ──────────────────────────────────────────────────────────────────────────────
  */
 
-
 /* 
-pp()	Pretty-print print_r()
-ppd()	Pretty-print + die
-ppr()	Return string version of print_r
-pper()	Echo + return
-pd()	Pretty var_dump()
-pdd()	Pretty var_dump() + die
-pdr()	Return string version of var_dump
-d()	Quick var_dump(s)
-dd()	Quick var_dump(s) + die
-mlog()	Log plain string
-log_pr()	Log print_r() output
-log_vd()	Log var_dump() output
+### 🧩 Debug & Log Function Lexicon
+
+| Function     | Description                           |
+|--------------|---------------------------------------|
+| `pp()`       | Pretty-print `print_r()`              |
+| `ppd()`      | Pretty-print `print_r()` and `die()`  |
+| `ppr()`      | Return string version of `print_r()`  |
+| `pper()`     | Echo + return string from `print_r()` |
+| `pd()`       | Pretty-print `var_dump()`             |
+| `pdd()`      | Pretty-print `var_dump()` and `die()` |
+| `pdr()`      | Return string version of `var_dump()` |
+| `d()`        | Quick `var_dump()` (one or many)      |
+| `dd()`       | Quick `var_dump()` and `die()`        |
+| `mlog()`     | Log a plain string                    |
+| `log_pr()`   | Log `print_r()` output                |
+| `log_vd()`   | Log `var_dump()` output               |
+
 */
 
 // --- Pretty Print (print_r)
@@ -281,7 +278,7 @@ function ppr($data, $limit = null)
 {
     $output = print_r($data, true);
     if ($limit !== null) {
-        $lines = explode("\n", $output);
+        $lines  = explode("\n", $output);
         $output = implode("\n", array_slice($lines, 0, $limit));
     }
     return "<pre>$output</pre>";
@@ -310,7 +307,10 @@ function pdr($var, $label = null)
 {
     ob_start();
     echo "<pre>";
-    if ($label) echo "$label:\n";
+    if ($label) {
+        echo "$label:\n";
+    }
+
     var_dump($var);
     echo "</pre>";
     return ob_get_clean();
@@ -319,7 +319,10 @@ function pdr($var, $label = null)
 // --- Simple dump shortcuts
 function d(...$args)
 {
-    foreach ($args as $arg) echo pdr($arg);
+    foreach ($args as $arg) {
+        echo pdr($arg);
+    }
+
 }
 
 function dd(...$args)
@@ -345,7 +348,6 @@ function log_vd($var, $label = null, $file = 'debug_vd.log')
     mlog(pdr($var, $label), null, $file);
 }
 
-
 function debug_session()
 {
     echo "<div style='font-family: monospace; color: black; background: #f8f8f8; border: 1px solid #ccc; padding: 10px; margin: 10px 0;'>";
@@ -355,8 +357,6 @@ function debug_session()
     echo "<pre>" . htmlspecialchars(print_r($_SESSION, true)) . "</pre>";
     echo "</div>";
 }
-
-
 
 /**
  * ──────────────────────────────────────────────────────────────────────────────
@@ -376,35 +376,40 @@ function now($format = 'Y-m-d H:i:s')
 // --- files.php ---
 function jsonf($file, $assoc = true)
 {
-    if (!file_exists($file)) return null;
+    if (! file_exists($file)) {
+        return null;
+    }
+
     $content = file_get_contents($file);
     return json_decode($content, $assoc);
 }
-
 
 /**
  * ──────────────────────────────────────────────────────────────────────────────
  *   html.php
  * ──────────────────────────────────────────────────────────────────────────────
  */
+
 /* links */
 function a($href, $text = null, $target = '', $class = '')
 {
-    if (!preg_match('#^https?://#', $href)) {
+    if (! preg_match('#^https?://#', $href)) {
         $href = "https://$href";
     }
 
     $text = $text ?? $href;
 
     $targetAttr = $target ? " target=\"$target\"" : '';
-    $classAttr  = $class  ? " class=\"$class\""   : '';
+    $classAttr  = $class ? " class=\"$class\"" : '';
 
     return "<a href=\"$href\"$targetAttr$classAttr>$text</a>";
 }
 
 function build_html_table_safe($array, $class = '', $id = '')
 {
-    if (empty($array)) return "<p><em>No data.</em></p>";
+    if (empty($array)) {
+        return "<p><em>No data.</em></p>";
+    }
 
     $idAttr = $id !== '' ? " id='" . htmlspecialchars($id) . "'" : '';
 
@@ -451,7 +456,7 @@ function build_html_table_safe($array, $class = '', $id = '')
  * @return string     The generated HTML table
  */
 
-function build_html_table(array $rows, array $allow_raw_cols = [], string $cssClass  = '', string $id = '')
+function build_html_table(array $rows, array $allow_raw_cols = [], string $cssClass = '', string $id = '')
 {
 
     $array = $rows;
@@ -461,10 +466,10 @@ function build_html_table(array $rows, array $allow_raw_cols = [], string $cssCl
         return "<p><em>No data.</em></p>";
     }
 
-    $idAttr = $id !== '' ? " id='" . htmlspecialchars($id, ENT_QUOTES, 'UTF-8') . "'" : '';
+    $idAttr   = $id !== '' ? " id='" . htmlspecialchars($id, ENT_QUOTES, 'UTF-8') . "'" : '';
     $tableTag = $class !== ''
-        ? "<table{$idAttr} class='" . htmlspecialchars($class, ENT_QUOTES, 'UTF-8') . "'>"
-        : "<table{$idAttr} border='1' cellpadding='6' cellspacing='0'>";
+    ? "<table{$idAttr} class='" . htmlspecialchars($class, ENT_QUOTES, 'UTF-8') . "'>"
+    : "<table{$idAttr} border='1' cellpadding='6' cellspacing='0'>";
 
     $html = $tableTag;
     // header
@@ -494,16 +499,15 @@ function build_html_table(array $rows, array $allow_raw_cols = [], string $cssCl
     return $html;
 }
 
-
 /**
  * Universal table builder.
  *
  * @param array          $rows             List of rows (
  *                                         either indexed arrays or associative arrays
  *                                       )
- * @param array|string[] $allow_raw_cols   Keys (for assoc rows) or column‑indexes 
+ * @param array|string[] $allow_raw_cols   Keys (for assoc rows) or column‑indexes
  *                                         (for indexed rows) to skip escaping
- * @param array|string   $attrs            Either a string of CSS classes, or an array 
+ * @param array|string   $attrs            Either a string of CSS classes, or an array
  *                                         of HTML attributes (class, id, data-*)
  * @return string
  */
@@ -522,7 +526,7 @@ function build_html_table_universal(
     }
 
     // Decide if rows are associative or indexed
-    $first = reset($rows);
+    $first   = reset($rows);
     $isAssoc = array_keys($first) !== range(0, count($first) - 1);
 
     // Build headers
@@ -532,7 +536,7 @@ function build_html_table_universal(
         // indexed rows: numeric columns → use 1-based labels or empty
         $headers = array_map(fn($i) => "Col{$i}", array_keys($first));
     }
-    $thCells = array_map(fn($h) => tag('th', htmlspecialchars((string)$h)), $headers);
+    $thCells = array_map(fn($h) => tag('th', htmlspecialchars((string) $h)), $headers);
     $thead   = tag('thead', tag('tr', $thCells));
 
     // Build body
@@ -540,12 +544,12 @@ function build_html_table_universal(
     foreach ($rows as $row) {
         $tds = [];
         foreach ($headers as $i => $col) {
-            $cell = $isAssoc ? ($row[$col] ?? '') : ($row[$i] ?? '');
-            $key  = $isAssoc ? $col : $i;
-            $raw  = in_array($key, $allow_raw_cols, true);
+            $cell    = $isAssoc ? ($row[$col] ?? '') : ($row[$i] ?? '');
+            $key     = $isAssoc ? $col : $i;
+            $raw     = in_array($key, $allow_raw_cols, true);
             $content = $raw
-                ? $cell
-                : htmlspecialchars((string)$cell, ENT_QUOTES);
+            ? $cell
+            : htmlspecialchars((string) $cell, ENT_QUOTES);
             $tds[] = tag('td', $content);
         }
         $bodyRows[] = tag('tr', $tds);
@@ -555,14 +559,11 @@ function build_html_table_universal(
     return tag('table', $thead . $tbody, $attrs);
 }
 
-
-
 /**
  * ──────────────────────────────────────────────────────────────────────────────
  *   other.php
  * ──────────────────────────────────────────────────────────────────────────────
  */
-
 
 function climb_dir(string $path = null, int $levels = 1): string
 {
@@ -575,8 +576,8 @@ function climb_dir(string $path = null, int $levels = 1): string
 
     // 2) Normalize to a directory
     $dir = is_dir($path)
-        ? rtrim($path, '/\\')
-        : dirname($path);
+    ? rtrim($path, '/\\')
+    : dirname($path);
 
     // 3) Climb up $levels times
     while ($levels-- > 0) {
@@ -591,26 +592,26 @@ function climb_dir(string $path = null, int $levels = 1): string
     return $dir;
 }
 
-
 // --- list counter ---
-function c_list(array $items, $reset = false)
+function clist(array $items, $reset = false)
 {
     static $counter = 1;
-    if ($reset) $counter = 1;
-
-    foreach ($items as $item) {
-        echo $counter++ . '. ' . $item . '<br>';
+    if ($reset) {
+        $counter = 1;
     }
-}
 
+    $html = '';
+    foreach ($items as $item) {
+        $html .= $counter++ . '. ' . $item . '<br>';
+    }
+    return $html;
+}
 
 //Usage
 /* 
 c_list(['Step A', 'Step B', 'Step C']);
 c_list(['One', 'Two'], true); // resets numbering
 */
-
-
 
 function load($file)
 {
@@ -619,14 +620,13 @@ function load($file)
 
 function def($name, $value)
 {
-    if (!defined($name)) {
+    if (! defined($name)) {
         define($name, $value);
     }
     // else {
     //     echo $name . " defined<br>";
     // }
 }
-
 
 /**
  * ──────────────────────────────────────────────────────────────────────────────
@@ -636,10 +636,10 @@ function def($name, $value)
 
 function hsc($str)
 {
-    echo htmlspecialchars($str);
+    return htmlspecialchars($str);
 }
 
-function json($data)
+function sendJson($data)
 {
     header('Content-Type: application/json');
     echo json_encode($data);
@@ -648,14 +648,13 @@ function json($data)
 
 function ok($msg = 'OK')
 {
-    json(['status' => 'ok', 'msg' => $msg]);
+    sendJson(['status' => 'ok', 'msg' => $msg]);
 }
 
 function fail($msg = 'Error')
 {
-    json(['status' => 'fail', 'msg' => $msg]);
+    sendJson(['status' => 'fail', 'msg' => $msg]);
 }
-
 
 /**
  * ──────────────────────────────────────────────────────────────────────────────
@@ -670,7 +669,6 @@ function slugify($string)
     return trim($string, '-');
 }
 
-
 /**
  * ──────────────────────────────────────────────────────────────────────────────
  *   style.php
@@ -680,9 +678,9 @@ function slugify($string)
 /* Headings */
 function h($level, $text, $class = '')
 {
-    $level = max(1, min(6, (int)$level));
+    $level     = max(1, min(6, (int) $level));
     $classAttr = $class ? " class=\"$class\"" : '';
-    echo "<h$level$classAttr>$text</h$level>";
+    return "<h$level$classAttr>$text</h$level>";
 }
 
 /* Inline Elements */
@@ -716,32 +714,30 @@ function mark($text = '', $class = '')
     return "<mark$classAttr>$text</mark>";
 }
 
-
 /* Block Elements */
-
 
 function p($text = '', $class = '')
 {
     $classAttr = $class ? " class=\"$class\"" : '';
-    echo "<p$classAttr>$text</p>";
+    return "<p$classAttr>$text</p>";
 }
 
 function span($text = '', $class = '')
 {
     $classAttr = $class ? " class=\"$class\"" : '';
-    echo "<span$classAttr>$text</span>";
+    return "<span$classAttr>$text</span>";
 }
 
 function div($text = '', $class = '')
 {
     $classAttr = $class ? " class=\"$class\"" : '';
-    echo "<div$classAttr>$text</div>";
+    return "<div$classAttr>$text</div>";
 }
 
 function section($text = '', $class = '')
 {
     $classAttr = $class ? " class=\"$class\"" : '';
-    echo "<section$classAttr>$text</section>";
+    return "<section$classAttr>$text</section>";
 }
 
 /* pre code */
@@ -749,111 +745,118 @@ function section($text = '', $class = '')
 function code($content, $lang = '')
 {
     $class = $lang ? " class=\"language-$lang\"" : '';
-    echo "<pre><code$class>" . htmlspecialchars($content) . "</code></pre>";
+    return "<pre><code$class>" . htmlspecialchars($content) . "</code></pre>";
 }
 
 function codejs($text)
 {
-    code($text, 'js');
+    return code($text, 'js');
 }
 function codephp($text)
 {
-    code($text, 'php');
+    return code($text, 'php');
 }
 function codejson($text)
 {
-    code($text, 'json');
+    return code($text, 'json');
 }
 function codehtml($text)
 {
-    code($text, 'html');
+    return code($text, 'html');
 }
 function codesql($text)
 {
-    code($text, 'sql');
+    return code($text, 'sql');
 }
 function codebash($text)
 {
-    code($text, 'bash');
+    return code($text, 'bash');
 }
 function codec($text)
 {
-    code($text, 'c');
+    return code($text, 'c');
 }
-
 
 /* Lists */
 function ul(array $items, $class = '')
 {
     $classAttr = $class ? " class=\"$class\"" : '';
-    echo "<ul$classAttr>";
+    $html      = "<ul$classAttr>";
     foreach ($items as $item) {
-        echo "<li>$item</li>";
+        $html .= "<li>$item</li>";
     }
-    echo "</ul>";
+    $html .= "</ul>";
+    return $html;
 }
 
-function ul_open()
+function ul_open($class = '')
 {
-    echo "<ul>";
+    $classAttr = $class ? " class=\"$class\"" : '';
+    return "<ul$classAttr>";
 }
+
 function ul_close()
 {
-    echo "</ul>";
-}
-function li($text)
-{
-    echo "<li>$text</li>";
+    return "</ul>";
 }
 
-/* Line Breaks */
+function li($text)
+{
+    return "<li>$text</li>";
+}
+
+/*  */
+
 function br(...$args)
 {
     if (empty($args)) {
-        echo '<br>';
-    } else {
-        foreach ($args as $arg) {
-            echo '<br>' . $arg;
-        }
+        return '<br>';
     }
+
+    $html = '';
+    foreach ($args as $arg) {
+        $html .= '<br>' . $arg;
+    }
+    return $html;
 }
 
-// Line after content
 function bra(...$args)
 {
     if (empty($args)) {
-        echo '<br>';
-    } else {
-        foreach ($args as $arg) {
-            echo $arg . '<br>';
-        }
+        return '<br>';
     }
+
+    $html = '';
+    foreach ($args as $arg) {
+        $html .= $arg . '<br>';
+    }
+    return $html;
 }
 
-
-/* Horizontal Rule before content  */
 function hr(...$args)
 {
     if (empty($args)) {
-        echo '<hr>';
-    } else {
-        foreach ($args as $arg) {
-            echo '<hr>' . $arg;
-        }
+        return '<hr>';
     }
+
+    $html = '';
+    foreach ($args as $arg) {
+        $html .= '<hr>' . $arg;
+    }
+    return $html;
 }
 
-
-// Horizontal Rule after content
 function hra(...$args)
 {
     if (empty($args)) {
-        echo '<hr>';
-    } else {
-        foreach ($args as $arg) {
-            echo $arg . '<hr>';
-        }
+        return '<hr>';
     }
+
+    $html = '';
+    foreach ($args as $arg) {
+        $html .= $arg . '<hr>';
+    }
+    return $html;
 }
 
 /* Auto Counter 1. 2. 3. */
@@ -861,7 +864,7 @@ function hra(...$args)
 function c($text = '')
 {
     static $counter = 1;
-    echo $counter++ . '. ' . $text;
+    return $counter++ . '. ' . $text;
 }
 
 function c_str($text = '')
@@ -881,7 +884,7 @@ function tag(string $tag, $content = '', array $attrs = [], bool $selfClose = fa
 {
     $attrStrings = [];
     foreach ($attrs as $k => $v) {
-        $attrStrings[] = sprintf('%s="%s"', $k, htmlspecialchars((string)$v, ENT_QUOTES));
+        $attrStrings[] = sprintf('%s="%s"', $k, htmlspecialchars((string) $v, ENT_QUOTES));
     }
     $attrString = $attrStrings ? ' ' . implode(' ', $attrStrings) : '';
     if ($selfClose) {
@@ -972,7 +975,7 @@ function html_h6($content = '', array $attrs = []): string
 
 function html_p($content = '', array $attrs = []): string
 {
-    return html_tag('p', htmlspecialchars((string)$content), $attrs);
+    return html_tag('p', htmlspecialchars((string) $content), $attrs);
 }
 function html_blockquote($content = '', array $attrs = []): string
 {
@@ -980,11 +983,11 @@ function html_blockquote($content = '', array $attrs = []): string
 }
 function html_pre($content = '', array $attrs = []): string
 {
-    return html_tag('pre', htmlspecialchars((string)$content), $attrs);
+    return html_tag('pre', htmlspecialchars((string) $content), $attrs);
 }
 function html_code($content = '', array $attrs = []): string
 {
-    return html_tag('code', htmlspecialchars((string)$content), $attrs);
+    return html_tag('code', htmlspecialchars((string) $content), $attrs);
 }
 
 function html_ul(array $items, array $attrs = []): string
@@ -1007,8 +1010,8 @@ function html_dl(array $terms, array $attrs = []): string
     // $terms = [['term'=>'T','desc'=>'D'], ...]
     $children = [];
     foreach ($terms as $t) {
-        $children[] = tag('dt', htmlspecialchars((string)$t['term']));
-        $children[] = tag('dd', htmlspecialchars((string)$t['desc']));
+        $children[] = tag('dt', htmlspecialchars((string) $t['term']));
+        $children[] = tag('dd', htmlspecialchars((string) $t['desc']));
     }
     return html_tag('dl', $children, $attrs);
 }
@@ -1039,8 +1042,6 @@ function html_td($content = '', array $attrs = []): string
     return html_tag('td', $content, $attrs);
 }
 
-
-
 // Form elements
 function html_form($content = '', array $attrs = []): string
 {
@@ -1048,7 +1049,7 @@ function html_form($content = '', array $attrs = []): string
 }
 function html_label($content = '', array $attrs = []): string
 {
-    return html_tag('label', htmlspecialchars((string)$content), $attrs);
+    return html_tag('label', htmlspecialchars((string) $content), $attrs);
 }
 function html_input(array $attrs = []): string
 {
@@ -1056,13 +1057,13 @@ function html_input(array $attrs = []): string
 }
 function html_textarea($content = '', array $attrs = []): string
 {
-    return html_tag('textarea', htmlspecialchars((string)$content), $attrs);
+    return html_tag('textarea', htmlspecialchars((string) $content), $attrs);
 }
 function html_select(array $options, array $attrs = []): string
 {
     $opts = [];
     foreach ($options as $value => $text) {
-        $opts[] = tag('option', htmlspecialchars((string)$text), ['value' => (string)$value]);
+        $opts[] = tag('option', htmlspecialchars((string) $text), ['value' => (string) $value]);
     }
     return html_tag('select', $opts, $attrs);
 }
@@ -1118,7 +1119,7 @@ function pretty_html(string $html): string
     // Load fragment (use HTML-ENTITIES hack for UTF‑8)
     @$dom->loadHTML(
         '<?xml encoding="utf-8"?>'
-            . $html,
+        . $html,
         LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD
     );
 
@@ -1127,5 +1128,274 @@ function pretty_html(string $html): string
     return preg_replace('/^<\?xml.*?\?>\s*/', '', $out);
 }
 
+/* echo aliases */
 
+function e_get_r(...$args)
+{echo get_r(...$args);}
+function e_v(...$args)
+{echo v(...$args);}
+function e_get_var(...$args)
+{echo get_var(...$args);}
+function e_post_var(...$args)
+{echo post_var(...$args);}
+function e_request_var(...$args)
+{echo request_var(...$args);}
+function e_input_vars(...$args)
+{echo input_vars(...$args);}
+function e_get_vars(...$args)
+{echo get_vars(...$args);}
+function e_post_vars(...$args)
+{echo post_vars(...$args);}
+function e_req_vars(...$args)
+{echo req_vars(...$args);}
+function e_get_vars_prefixed(...$args)
+{echo get_vars_prefixed(...$args);}
+function e_input_all(...$args)
+{echo input_all(...$args);}
+function e_get_all(...$args)
+{echo get_all(...$args);}
+function e_post_all(...$args)
+{echo post_all(...$args);}
+function e_req_all(...$args)
+{echo req_all(...$args);}
+function e_extract_vars(...$args)
+{echo extract_vars(...$args);}
+function e_db_pdo(...$args)
+{echo db_pdo(...$args);}
+function e_db_all(...$args)
+{echo db_all(...$args);}
+function e_db_one(...$args)
+{echo db_one(...$args);}
+function e_db_insert_id(...$args)
+{echo db_insert_id(...$args);}
+function e_db_error(...$args)
+{echo db_error(...$args);}
+function e_db_count(...$args)
+{echo db_count(...$args);}
+function e_db_val(...$args)
+{echo db_val(...$args);}
+function e_db_exec(...$args)
+{echo db_exec(...$args);}
+function e_db_exists(...$args)
+{echo db_exists(...$args);}
+function e_db_mysqli(...$args)
+{echo db_mysqli(...$args);}
+function e_pp(...$args)
+{echo pp(...$args);}
+function e_mpp(...$args)
+{echo mpp(...$args);}
+function e_mppd(...$args)
+{echo mppd(...$args);}
+function e_ppd(...$args)
+{echo ppd(...$args);}
+function e_ppr(...$args)
+{echo ppr(...$args);}
+function e_pper(...$args)
+{echo pper(...$args);}
+function e_pd(...$args)
+{echo pd(...$args);}
+function e_pdd(...$args)
+{echo pdd(...$args);}
+function e_pdr(...$args)
+{echo pdr(...$args);}
+function e_d(...$args)
+{echo d(...$args);}
+function e_dd(...$args)
+{echo dd(...$args);}
+function e_mlog(...$args)
+{echo mlog(...$args);}
+function e_log_pr(...$args)
+{echo log_pr(...$args);}
+function e_log_vd(...$args)
+{echo log_vd(...$args);}
+function e_debug_session(...$args)
+{echo debug_session(...$args);}
+function e_env(...$args)
+{echo env(...$args);}
+function e_now(...$args)
+{echo now(...$args);}
+function e_jsonf(...$args)
+{echo jsonf(...$args);}
+function e_a(...$args)
+{echo a(...$args);}
+function e_build_html_table_safe(...$args)
+{echo build_html_table_safe(...$args);}
+function e_build_html_table(...$args)
+{echo build_html_table(...$args);}
+function e_build_html_table_universal(...$args)
+{echo build_html_table_universal(...$args);}
+function e_climb_dir(...$args)
+{echo climb_dir(...$args);}
+function e_clist(...$args)
+{echo clist(...$args);}
+function e_load(...$args)
+{echo load(...$args);}
+function e_def(...$args)
+{echo def(...$args);}
+function e_hsc(...$args)
+{echo hsc(...$args);}
+function e_sendjson(...$args)
+{echo sendjson(...$args);}
+function e_ok(...$args)
+{echo ok(...$args);}
+function e_fail(...$args)
+{echo fail(...$args);}
+function e_slugify(...$args)
+{echo slugify(...$args);}
+function e_h(...$args)
+{echo h(...$args);}
+function e_b(...$args)
+{echo b(...$args);}
+function e_i(...$args)
+{echo i(...$args);}
+function e_bi(...$args)
+{echo bi(...$args);}
+function e_small(...$args)
+{echo small(...$args);}
+function e_mark(...$args)
+{echo mark(...$args);}
+function e_p(...$args)
+{echo p(...$args);}
+function e_span(...$args)
+{echo span(...$args);}
+function e_div(...$args)
+{echo div(...$args);}
+function e_section(...$args)
+{echo section(...$args);}
+function e_code(...$args)
+{echo code(...$args);}
+function e_codejs(...$args)
+{echo codejs(...$args);}
+function e_codephp(...$args)
+{echo codephp(...$args);}
+function e_codejson(...$args)
+{echo codejson(...$args);}
+function e_codehtml(...$args)
+{echo codehtml(...$args);}
+function e_codesql(...$args)
+{echo codesql(...$args);}
+function e_codebash(...$args)
+{echo codebash(...$args);}
+function e_codec(...$args)
+{echo codec(...$args);}
+function e_ul(...$args)
+{echo ul(...$args);}
+function e_ul_open(...$args)
+{echo ul_open(...$args);}
+function e_ul_close(...$args)
+{echo ul_close(...$args);}
+function e_li(...$args)
+{echo li(...$args);}
+function e_br(...$args)
+{echo br(...$args);}
+function e_bra(...$args)
+{echo bra(...$args);}
+function e_hr(...$args)
+{echo hr(...$args);}
+function e_hra(...$args)
+{echo hra(...$args);}
+function e_c(...$args)
+{echo c(...$args);}
+function e_c_str(...$args)
+{echo c_str(...$args);}
+function e_tag(...$args)
+{echo tag(...$args);}
+function e_html_tag(...$args)
+{echo html_tag(...$args);}
+function e_html_html(...$args)
+{echo html_html(...$args);}
+function e_html_head(...$args)
+{echo html_head(...$args);}
+function e_html_body(...$args)
+{echo html_body(...$args);}
+function e_html_header(...$args)
+{echo html_header(...$args);}
+function e_html_footer(...$args)
+{echo html_footer(...$args);}
+function e_html_section(...$args)
+{echo html_section(...$args);}
+function e_html_article(...$args)
+{echo html_article(...$args);}
+function e_html_nav(...$args)
+{echo html_nav(...$args);}
+function e_html_aside(...$args)
+{echo html_aside(...$args);}
+function e_html_div(...$args)
+{echo html_div(...$args);}
+function e_html_span(...$args)
+{echo html_span(...$args);}
+function e_html_h1(...$args)
+{echo html_h1(...$args);}
+function e_html_h2(...$args)
+{echo html_h2(...$args);}
+function e_html_h3(...$args)
+{echo html_h3(...$args);}
+function e_html_h4(...$args)
+{echo html_h4(...$args);}
+function e_html_h5(...$args)
+{echo html_h5(...$args);}
+function e_html_h6(...$args)
+{echo html_h6(...$args);}
+function e_html_p(...$args)
+{echo html_p(...$args);}
+function e_html_blockquote(...$args)
+{echo html_blockquote(...$args);}
+function e_html_pre(...$args)
+{echo html_pre(...$args);}
+function e_html_code(...$args)
+{echo html_code(...$args);}
+function e_html_ul(...$args)
+{echo html_ul(...$args);}
+function e_html_ol(...$args)
+{echo html_ol(...$args);}
+function e_html_li(...$args)
+{echo html_li(...$args);}
+function e_html_dl(...$args)
+{echo html_dl(...$args);}
+function e_html_table(...$args)
+{echo html_table(...$args);}
+function e_html_thead(...$args)
+{echo html_thead(...$args);}
+function e_html_tbody(...$args)
+{echo html_tbody(...$args);}
+function e_html_tr(...$args)
+{echo html_tr(...$args);}
+function e_html_th(...$args)
+{echo html_th(...$args);}
+function e_html_td(...$args)
+{echo html_td(...$args);}
+function e_html_form(...$args)
+{echo html_form(...$args);}
+function e_html_label(...$args)
+{echo html_label(...$args);}
+function e_html_input(...$args)
+{echo html_input(...$args);}
+function e_html_textarea(...$args)
+{echo html_textarea(...$args);}
+function e_html_select(...$args)
+{echo html_select(...$args);}
+function e_html_button(...$args)
+{echo html_button(...$args);}
+function e_html_br(...$args)
+{echo html_br(...$args);}
+function e_html_hr(...$args)
+{echo html_hr(...$args);}
+function e_html_img(...$args)
+{echo html_img(...$args);}
+function e_html_meta(...$args)
+{echo html_meta(...$args);}
+function e_html_link(...$args)
+{echo html_link(...$args);}
+function e_html_script(...$args)
+{echo html_script(...$args);}
+function e_html_style(...$args)
+{echo html_style(...$args);}
+function e_pretty_html(...$args)
+{echo pretty_html(...$args);}
 
+function e(...$parts)
+{
+    foreach ($parts as $part) {
+        echo $part;
+    }
+}
