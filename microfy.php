@@ -7,9 +7,9 @@
  * Author: SirCode
  */
 
-// paths
-namespace Sircode\Microfy;
-use DOMDocument;
+// paths optional
+//namespace Sircode\Microfy;
+//use DOMDocument;
 /**
  * ──────────────────────────────────────────────────────────────────────────────
  *   arrays.php
