@@ -25,23 +25,61 @@ Forget bloated frameworks — `microfy.php` gives you practical tools with no se
 
 ### ✨ Features
 
-* **Request Shortcuts**: `get_var()`, `post_var()`, `_request_var()`, plus extract helpers.
-* **Debug Helpers**: `pp()`, `pd()`, `d()`, `log_pr()`, `log_vd()`, `mlog()`.
-* **Slugify**: Clean URL-friendly slugs from text.
-* **JSON Read**: `jsonf()` for quick file-based config/data.
-* **UI HTML Snippets**: `h()`, `br()`, `hr()`, `mark()`, `code()`, `a()`, `html_table()` etc.
-* **Array Utils**: `get_r()` for safe access.
-* **Database**: `db_pdo()`, `db_all()`, `db_exists()` — simple and safe.
-* **Auto Titles + Lists**: `c_str()`, `c_list()` for numbered docs or steps.
-* **HTML Builders**: Quickly create semantic HTML with helpers like:
+## Features
+
+- **Request Shortcuts**  
+  `get_var()`, `post_var()`, `request_var()`, plus helpers to extract and sanitize inputs.
+
+- **Debug Helpers**  
+  `pp()`, `pd()`, `d()`, `log_pr()`, `log_vd()`, `mlog()` for fast, readable debugging output.
+
+- **Slugify**  
+  Create clean, URL-friendly slugs from arbitrary text with `slugify()`.
+
+- **JSON File Loader**  
+  `jsonf()` to quickly read simple config or data files.
+
+- **HTML UI Snippets**  
+  Helpers like `h()`, `br()`, `hr()`, `mark()`, `code()`, `a()`, `html_table()` to output HTML fast.
+
+- **Array Utils**  
+  `get_r()` for deep-safe access to nested array values.
+
+- **Database Shortcuts**  
+  `db_pdo()`, `db_all()`, `db_exists()`, etc. — minimal, clean DB helpers.
+
+- **Auto Titles + Lists**  
+  `c_str()`, `c_list()` to build auto-numbered sections or checklists.
+
+- **HTML Builders**  
+  Create semantic HTML fast:  
   `html_div()`, `html_section()`, `html_h1()`, `html_p()`,  
   `html_ul()`, `html_li()`, `html_form()`, `html_input()`,  
   `html_table()`, `html_tr()`, `html_td()`, `html_button()`, etc.
-* **Low-level Control**: Use `tag()` or `html_tag()` to build any tag with attributes.
-* **Pretty Output**: Format HTML fragments with `pretty_html()` for debugging or inspection.
 
+- **Low-level Tag Control**  
+  `tag()` and `html_tag()` let you generate any HTML tag with attributes.
+
+- **Pretty Output**  
+  Use `pretty_html()` to clean up or inspect raw HTML output.
 
 ---
+
+### 🔄 Echo Shortcut: `e_` Functions
+
+Most helpers return HTML strings.
+You can echo them manually:
+
+```php
+echo p("Hello");
+```
+
+Or use the `e_` prefixed shortcut:
+
+```php
+e_p("Hello");
+```
+
 
 ### 📌 When to Use microfy.php
 
