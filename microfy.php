@@ -777,6 +777,25 @@ function codec($text)
     return code($text, 'c');
 }
 
+function dedent($text)
+{
+    $lines  = explode("\n", $text);
+    $indent = null;
+    foreach ($lines as $line) {
+        if (trim($line) === '') {
+            continue;
+        }
+
+        preg_match('/^\s*/', $line, $match);
+        $spaces = strlen($match[0]);
+        $indent = $indent === null ? $spaces : min($indent, $spaces);
+    }
+    if ($indent > 0) {
+        $lines = array_map(fn($line) => substr($line, $indent), $lines);
+    }
+    return implode("\n", $lines);
+}
+
 /* Lists */
 function ul(array $items, $class = '')
 {
@@ -1140,30 +1159,7 @@ function e_post_var(...$args)
 {echo post_var(...$args);}
 function e_request_var(...$args)
 {echo request_var(...$args);}
-function e_input_vars(...$args)
-{echo input_vars(...$args);}
-function e_get_vars(...$args)
-{echo get_vars(...$args);}
-function e_post_vars(...$args)
-{echo post_vars(...$args);}
-function e_req_vars(...$args)
-{echo req_vars(...$args);}
-function e_get_vars_prefixed(...$args)
-{echo get_vars_prefixed(...$args);}
-function e_input_all(...$args)
-{echo input_all(...$args);}
-function e_get_all(...$args)
-{echo get_all(...$args);}
-function e_post_all(...$args)
-{echo post_all(...$args);}
-function e_req_all(...$args)
-{echo req_all(...$args);}
-function e_extract_vars(...$args)
-{echo extract_vars(...$args);}
-function e_db_pdo(...$args)
-{echo db_pdo(...$args);}
-function e_db_all(...$args)
-{echo db_all(...$args);}
+// DB:
 function e_db_one(...$args)
 {echo db_one(...$args);}
 function e_db_insert_id(...$args)
@@ -1174,74 +1170,43 @@ function e_db_count(...$args)
 {echo db_count(...$args);}
 function e_db_val(...$args)
 {echo db_val(...$args);}
-function e_db_exec(...$args)
-{echo db_exec(...$args);}
+
+// Optional:
 function e_db_exists(...$args)
 {echo db_exists(...$args);}
-function e_db_mysqli(...$args)
-{echo db_mysqli(...$args);}
-function e_pp(...$args)
-{echo pp(...$args);}
-function e_mpp(...$args)
-{echo mpp(...$args);}
-function e_mppd(...$args)
-{echo mppd(...$args);}
-function e_ppd(...$args)
-{echo ppd(...$args);}
+
 function e_ppr(...$args)
 {echo ppr(...$args);}
-function e_pper(...$args)
-{echo pper(...$args);}
-function e_pd(...$args)
-{echo pd(...$args);}
-function e_pdd(...$args)
-{echo pdd(...$args);}
 function e_pdr(...$args)
 {echo pdr(...$args);}
-function e_d(...$args)
-{echo d(...$args);}
-function e_dd(...$args)
-{echo dd(...$args);}
-function e_mlog(...$args)
-{echo mlog(...$args);}
-function e_log_pr(...$args)
-{echo log_pr(...$args);}
-function e_log_vd(...$args)
-{echo log_vd(...$args);}
+
 function e_debug_session(...$args)
 {echo debug_session(...$args);}
 function e_env(...$args)
 {echo env(...$args);}
 function e_now(...$args)
 {echo now(...$args);}
-function e_jsonf(...$args)
-{echo jsonf(...$args);}
-function e_a(...$args)
-{echo a(...$args);}
-function e_build_html_table_safe(...$args)
-{echo build_html_table_safe(...$args);}
-function e_build_html_table(...$args)
-{echo build_html_table(...$args);}
-function e_build_html_table_universal(...$args)
-{echo build_html_table_universal(...$args);}
+
 function e_climb_dir(...$args)
 {echo climb_dir(...$args);}
 function e_clist(...$args)
 {echo clist(...$args);}
-function e_load(...$args)
-{echo load(...$args);}
 function e_def(...$args)
 {echo def(...$args);}
-function e_hsc(...$args)
-{echo hsc(...$args);}
-function e_sendjson(...$args)
-{echo sendjson(...$args);}
+
 function e_ok(...$args)
 {echo ok(...$args);}
 function e_fail(...$args)
 {echo fail(...$args);}
 function e_slugify(...$args)
 {echo slugify(...$args);}
+
+function e_c_str(...$args)
+{echo c_str(...$args);}
+function e_hsc(...$args)
+{echo hsc(...$args);}
+function e_a(...$args)
+{echo a(...$args);}
 function e_h(...$args)
 {echo h(...$args);}
 function e_b(...$args)
@@ -1296,8 +1261,6 @@ function e_hra(...$args)
 {echo hra(...$args);}
 function e_c(...$args)
 {echo c(...$args);}
-function e_c_str(...$args)
-{echo c_str(...$args);}
 function e_tag(...$args)
 {echo tag(...$args);}
 function e_html_tag(...$args)
@@ -1354,6 +1317,17 @@ function e_html_dl(...$args)
 {echo html_dl(...$args);}
 function e_html_table(...$args)
 {echo html_table(...$args);}
+
+/*  */
+function e_build_html_table(...$args)
+{echo build_html_table(...$args);}
+function e_build_html_table_safe(...$args)
+{echo build_html_table_safe(...$args);}
+function e_build_html_table_universal(...$args)
+{echo build_html_table_universal(...$args);}
+
+/*  */
+
 function e_html_thead(...$args)
 {echo html_thead(...$args);}
 function e_html_tbody(...$args)
@@ -1390,6 +1364,7 @@ function e_html_script(...$args)
 {echo html_script(...$args);}
 function e_html_style(...$args)
 {echo html_style(...$args);}
+/*  */
 function e_pretty_html(...$args)
 {echo pretty_html(...$args);}
 
