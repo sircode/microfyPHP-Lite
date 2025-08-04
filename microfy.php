@@ -211,6 +211,34 @@ function db_exists(PDO $pdo, string $html_table, string $column, $value)
     return $stmt->fetchColumn() !== false;
 }
 
+function db_insert(PDO $pdo, string $table, array $data)
+{
+    $cols = array_keys($data);
+    $placeholders = array_fill(0, count($data), '?');
+    $sql = "INSERT INTO `$table` (`" . implode('`,`', $cols) . "`) VALUES (" . implode(',', $placeholders) . ")";
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute(array_values($data));
+    return $pdo->lastInsertId();
+}
+
+function db_update(PDO $pdo, string $table, array $data, string $where, array $params = [])
+{
+    $set = implode(', ', array_map(fn($col) => "`$col` = ?", array_keys($data)));
+    $sql = "UPDATE `$table` SET $set WHERE $where";
+    $stmt = $pdo->prepare($sql);
+    return $stmt->execute(array_merge(array_values($data), $params));
+}
+
+
+function db_delete(PDO $pdo, string $table, string $where, array $params = [])
+{
+    $sql = "DELETE FROM `$table` WHERE $where";
+    $stmt = $pdo->prepare($sql);
+    return $stmt->execute($params);
+}
+
+
+
 // --- Connect using MySQLi ---
 function db_mysqli($host, $user, $pass, $dbname, $port = 3306)
 {
