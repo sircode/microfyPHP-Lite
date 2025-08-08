@@ -3,7 +3,7 @@
 /**
  * MicrofyPHP
  * microfy.php
- * v0.1.5
+ * v0.1.6
  * Author: SirCode
  */
 
@@ -94,8 +94,8 @@ function input_all(array $map, array $source): array
 
         // Treat empty string as "no value"
         $result[$varName] = (isset($source[$key]) && $source[$key] !== '')
-        ? $source[$key]
-        : $default;
+            ? $source[$key]
+            : $default;
     }
 
     return $result;
@@ -350,7 +350,6 @@ function d(...$args)
     foreach ($args as $arg) {
         echo pdr($arg);
     }
-
 }
 
 function dd(...$args)
@@ -433,7 +432,7 @@ function a($href, $text = null, $target = '', $class = '')
     return "<a href=\"$href\"$targetAttr$classAttr>$text</a>";
 }
 
-function build_html_table_safe($array, $class = '', $id = '')
+function build_html_table_safe($array, $id = '', $class = '')
 {
     if (empty($array)) {
         return "<p><em>No data.</em></p>";
@@ -477,27 +476,37 @@ function build_html_table_safe($array, $class = '', $id = '')
  * but you can whitelist columns that contain pre-escaped HTML.
  *
  * @param array       $array          The row data
- * @param string[]    $allow_raw_cols List of columns whose contents
+ * @param string[]    $rawColumns List of columns whose contents
  *                                    are already safe HTML
  * @param string      $class          Optional table class
  * @param string      $id             Optional table id
  * @return string     The generated HTML table
  */
 
-function build_html_table(array $rows, array $allow_raw_cols = [], string $cssClass = '', string $id = '')
+function build_html_table_legacy(array $rows, array $rawColumns = [], string $class = '', string $id = '', array $attrs = []): string
+
 {
 
     $array = $rows;
-    $class = $cssClass;
 
     if (empty($array)) {
         return "<p><em>No data.</em></p>";
     }
 
     $idAttr   = $id !== '' ? " id='" . htmlspecialchars($id, ENT_QUOTES, 'UTF-8') . "'" : '';
-    $tableTag = $class !== ''
-    ? "<table{$idAttr} class='" . htmlspecialchars($class, ENT_QUOTES, 'UTF-8') . "'>"
-    : "<table{$idAttr} border='1' cellpadding='6' cellspacing='0'>";
+
+    $attrString = '';
+    foreach ($attrs as $key => $value) {
+        $attrString .= ' ' . htmlspecialchars($key, ENT_QUOTES, 'UTF-8') . '="' . htmlspecialchars($value, ENT_QUOTES, 'UTF-8') . '"';
+    }
+
+    if ($class !== '') {
+        $classAttr = " class='" . htmlspecialchars($class, ENT_QUOTES, 'UTF-8') . "'";
+    } else {
+        $classAttr = '';
+    }
+
+    $tableTag = "<table{$idAttr}{$classAttr}{$attrString}>";
 
     $html = $tableTag;
     // header
@@ -512,7 +521,7 @@ function build_html_table(array $rows, array $allow_raw_cols = [], string $cssCl
     foreach ($array as $row) {
         $html .= "<tr>";
         foreach ($row as $col => $cell) {
-            if (in_array($col, $allow_raw_cols, true)) {
+            if (in_array($col, $rawColumns, true)) {
                 // output raw HTML for whitelisted columns
                 $html .= "<td>{$cell}</td>";
             } else {
@@ -527,21 +536,22 @@ function build_html_table(array $rows, array $allow_raw_cols = [], string $cssCl
     return $html;
 }
 
+
 /**
  * Universal table builder.
  *
  * @param array          $rows             List of rows (
  *                                         either indexed arrays or associative arrays
  *                                       )
- * @param array|string[] $allow_raw_cols   Keys (for assoc rows) or column‑indexes
+ * @param array|string[] $rawColumns   Keys (for assoc rows) or column‑indexes
  *                                         (for indexed rows) to skip escaping
  * @param array|string   $attrs            Either a string of CSS classes, or an array
  *                                         of HTML attributes (class, id, data-*)
  * @return string
  */
-function build_html_table_universal(
+function build_html_table(
     array $rows,
-    array $allow_raw_cols = [],
+    array $rawColumns = [],
     $attrs = []
 ): string {
     if (empty($rows)) {
@@ -574,10 +584,10 @@ function build_html_table_universal(
         foreach ($headers as $i => $col) {
             $cell    = $isAssoc ? ($row[$col] ?? '') : ($row[$i] ?? '');
             $key     = $isAssoc ? $col : $i;
-            $raw     = in_array($key, $allow_raw_cols, true);
+            $raw     = in_array($key, $rawColumns, true);
             $content = $raw
-            ? $cell
-            : htmlspecialchars((string) $cell, ENT_QUOTES);
+                ? $cell
+                : htmlspecialchars((string) $cell, ENT_QUOTES);
             $tds[] = tag('td', $content);
         }
         $bodyRows[] = tag('tr', $tds);
@@ -604,8 +614,8 @@ function climb_dir(string $path = null, int $levels = 1): string
 
     // 2) Normalize to a directory
     $dir = is_dir($path)
-    ? rtrim($path, '/\\')
-    : dirname($path);
+        ? rtrim($path, '/\\')
+        : dirname($path);
 
     // 3) Climb up $levels times
     while ($levels-- > 0) {
@@ -1166,7 +1176,7 @@ function pretty_html(string $html): string
     // Load fragment (use HTML-ENTITIES hack for UTF‑8)
     @$dom->loadHTML(
         '<?xml encoding="utf-8"?>'
-        . $html,
+            . $html,
         LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD
     );
 
@@ -1178,223 +1188,427 @@ function pretty_html(string $html): string
 /* echo aliases */
 
 function e_get_r(...$args)
-{echo get_r(...$args);}
+{
+    echo get_r(...$args);
+}
 function e_v(...$args)
-{echo v(...$args);}
+{
+    echo v(...$args);
+}
 function e_get_var(...$args)
-{echo get_var(...$args);}
+{
+    echo get_var(...$args);
+}
 function e_post_var(...$args)
-{echo post_var(...$args);}
+{
+    echo post_var(...$args);
+}
 function e_request_var(...$args)
-{echo request_var(...$args);}
+{
+    echo request_var(...$args);
+}
 // DB:
 function e_db_one(...$args)
-{echo db_one(...$args);}
+{
+    echo db_one(...$args);
+}
 function e_db_insert_id(...$args)
-{echo db_insert_id(...$args);}
+{
+    echo db_insert_id(...$args);
+}
 function e_db_error(...$args)
-{echo db_error(...$args);}
+{
+    echo db_error(...$args);
+}
 function e_db_count(...$args)
-{echo db_count(...$args);}
+{
+    echo db_count(...$args);
+}
 function e_db_val(...$args)
-{echo db_val(...$args);}
+{
+    echo db_val(...$args);
+}
 
 // Optional:
 function e_db_exists(...$args)
-{echo db_exists(...$args);}
+{
+    echo db_exists(...$args);
+}
 
 function e_ppr(...$args)
-{echo ppr(...$args);}
+{
+    echo ppr(...$args);
+}
 function e_pdr(...$args)
-{echo pdr(...$args);}
+{
+    echo pdr(...$args);
+}
 
 function e_debug_session(...$args)
-{echo debug_session(...$args);}
+{
+    echo debug_session(...$args);
+}
 function e_env(...$args)
-{echo env(...$args);}
+{
+    echo env(...$args);
+}
 function e_now(...$args)
-{echo now(...$args);}
+{
+    echo now(...$args);
+}
 
 function e_climb_dir(...$args)
-{echo climb_dir(...$args);}
+{
+    echo climb_dir(...$args);
+}
 function e_clist(...$args)
-{echo clist(...$args);}
+{
+    echo clist(...$args);
+}
 function e_def(...$args)
-{echo def(...$args);}
+{
+    echo def(...$args);
+}
 
 function e_ok(...$args)
-{echo ok(...$args);}
+{
+    echo ok(...$args);
+}
 function e_fail(...$args)
-{echo fail(...$args);}
+{
+    echo fail(...$args);
+}
 function e_slugify(...$args)
-{echo slugify(...$args);}
+{
+    echo slugify(...$args);
+}
 
 function e_c_str(...$args)
-{echo c_str(...$args);}
+{
+    echo c_str(...$args);
+}
 function e_hsc(...$args)
-{echo hsc(...$args);}
+{
+    echo hsc(...$args);
+}
 function e_a(...$args)
-{echo a(...$args);}
+{
+    echo a(...$args);
+}
 function e_h(...$args)
-{echo h(...$args);}
+{
+    echo h(...$args);
+}
 function e_b(...$args)
-{echo b(...$args);}
+{
+    echo b(...$args);
+}
 function e_i(...$args)
-{echo i(...$args);}
+{
+    echo i(...$args);
+}
 function e_bi(...$args)
-{echo bi(...$args);}
+{
+    echo bi(...$args);
+}
 function e_small(...$args)
-{echo small(...$args);}
+{
+    echo small(...$args);
+}
 function e_mark(...$args)
-{echo mark(...$args);}
+{
+    echo mark(...$args);
+}
 function e_p(...$args)
-{echo p(...$args);}
+{
+    echo p(...$args);
+}
 function e_span(...$args)
-{echo span(...$args);}
+{
+    echo span(...$args);
+}
 function e_div(...$args)
-{echo div(...$args);}
+{
+    echo div(...$args);
+}
 function e_section(...$args)
-{echo section(...$args);}
+{
+    echo section(...$args);
+}
 function e_code(...$args)
-{echo code(...$args);}
+{
+    echo code(...$args);
+}
 function e_codejs(...$args)
-{echo codejs(...$args);}
+{
+    echo codejs(...$args);
+}
 function e_codephp(...$args)
-{echo codephp(...$args);}
+{
+    echo codephp(...$args);
+}
 function e_codejson(...$args)
-{echo codejson(...$args);}
+{
+    echo codejson(...$args);
+}
 function e_codehtml(...$args)
-{echo codehtml(...$args);}
+{
+    echo codehtml(...$args);
+}
 function e_codesql(...$args)
-{echo codesql(...$args);}
+{
+    echo codesql(...$args);
+}
 function e_codebash(...$args)
-{echo codebash(...$args);}
+{
+    echo codebash(...$args);
+}
 function e_codec(...$args)
-{echo codec(...$args);}
+{
+    echo codec(...$args);
+}
 function e_ul(...$args)
-{echo ul(...$args);}
+{
+    echo ul(...$args);
+}
 function e_ul_open(...$args)
-{echo ul_open(...$args);}
+{
+    echo ul_open(...$args);
+}
 function e_ul_close(...$args)
-{echo ul_close(...$args);}
+{
+    echo ul_close(...$args);
+}
 function e_li(...$args)
-{echo li(...$args);}
+{
+    echo li(...$args);
+}
 function e_br(...$args)
-{echo br(...$args);}
+{
+    echo br(...$args);
+}
 function e_bra(...$args)
-{echo bra(...$args);}
+{
+    echo bra(...$args);
+}
 function e_hr(...$args)
-{echo hr(...$args);}
+{
+    echo hr(...$args);
+}
 function e_hra(...$args)
-{echo hra(...$args);}
+{
+    echo hra(...$args);
+}
 function e_c(...$args)
-{echo c(...$args);}
+{
+    echo c(...$args);
+}
 function e_tag(...$args)
-{echo tag(...$args);}
+{
+    echo tag(...$args);
+}
 function e_html_tag(...$args)
-{echo html_tag(...$args);}
+{
+    echo html_tag(...$args);
+}
 function e_html_html(...$args)
-{echo html_html(...$args);}
+{
+    echo html_html(...$args);
+}
 function e_html_head(...$args)
-{echo html_head(...$args);}
+{
+    echo html_head(...$args);
+}
 function e_html_body(...$args)
-{echo html_body(...$args);}
+{
+    echo html_body(...$args);
+}
 function e_html_header(...$args)
-{echo html_header(...$args);}
+{
+    echo html_header(...$args);
+}
 function e_html_footer(...$args)
-{echo html_footer(...$args);}
+{
+    echo html_footer(...$args);
+}
 function e_html_section(...$args)
-{echo html_section(...$args);}
+{
+    echo html_section(...$args);
+}
 function e_html_article(...$args)
-{echo html_article(...$args);}
+{
+    echo html_article(...$args);
+}
 function e_html_nav(...$args)
-{echo html_nav(...$args);}
+{
+    echo html_nav(...$args);
+}
 function e_html_aside(...$args)
-{echo html_aside(...$args);}
+{
+    echo html_aside(...$args);
+}
 function e_html_div(...$args)
-{echo html_div(...$args);}
+{
+    echo html_div(...$args);
+}
 function e_html_span(...$args)
-{echo html_span(...$args);}
+{
+    echo html_span(...$args);
+}
 function e_html_h1(...$args)
-{echo html_h1(...$args);}
+{
+    echo html_h1(...$args);
+}
 function e_html_h2(...$args)
-{echo html_h2(...$args);}
+{
+    echo html_h2(...$args);
+}
 function e_html_h3(...$args)
-{echo html_h3(...$args);}
+{
+    echo html_h3(...$args);
+}
 function e_html_h4(...$args)
-{echo html_h4(...$args);}
+{
+    echo html_h4(...$args);
+}
 function e_html_h5(...$args)
-{echo html_h5(...$args);}
+{
+    echo html_h5(...$args);
+}
 function e_html_h6(...$args)
-{echo html_h6(...$args);}
+{
+    echo html_h6(...$args);
+}
 function e_html_p(...$args)
-{echo html_p(...$args);}
+{
+    echo html_p(...$args);
+}
 function e_html_blockquote(...$args)
-{echo html_blockquote(...$args);}
+{
+    echo html_blockquote(...$args);
+}
 function e_html_pre(...$args)
-{echo html_pre(...$args);}
+{
+    echo html_pre(...$args);
+}
 function e_html_code(...$args)
-{echo html_code(...$args);}
+{
+    echo html_code(...$args);
+}
 function e_html_ul(...$args)
-{echo html_ul(...$args);}
+{
+    echo html_ul(...$args);
+}
 function e_html_ol(...$args)
-{echo html_ol(...$args);}
+{
+    echo html_ol(...$args);
+}
 function e_html_li(...$args)
-{echo html_li(...$args);}
+{
+    echo html_li(...$args);
+}
 function e_html_dl(...$args)
-{echo html_dl(...$args);}
+{
+    echo html_dl(...$args);
+}
 function e_html_table(...$args)
-{echo html_table(...$args);}
+{
+    echo html_table(...$args);
+}
 
 /*  */
 function e_build_html_table(...$args)
-{echo build_html_table(...$args);}
+{
+    echo build_html_table(...$args);
+}
 function e_build_html_table_safe(...$args)
-{echo build_html_table_safe(...$args);}
+{
+    echo build_html_table_safe(...$args);
+}
 function e_build_html_table_universal(...$args)
-{echo build_html_table_universal(...$args);}
+{
+    echo build_html_table_universal(...$args);
+}
 
 /*  */
 
 function e_html_thead(...$args)
-{echo html_thead(...$args);}
+{
+    echo html_thead(...$args);
+}
 function e_html_tbody(...$args)
-{echo html_tbody(...$args);}
+{
+    echo html_tbody(...$args);
+}
 function e_html_tr(...$args)
-{echo html_tr(...$args);}
+{
+    echo html_tr(...$args);
+}
 function e_html_th(...$args)
-{echo html_th(...$args);}
+{
+    echo html_th(...$args);
+}
 function e_html_td(...$args)
-{echo html_td(...$args);}
+{
+    echo html_td(...$args);
+}
 function e_html_form(...$args)
-{echo html_form(...$args);}
+{
+    echo html_form(...$args);
+}
 function e_html_label(...$args)
-{echo html_label(...$args);}
+{
+    echo html_label(...$args);
+}
 function e_html_input(...$args)
-{echo html_input(...$args);}
+{
+    echo html_input(...$args);
+}
 function e_html_textarea(...$args)
-{echo html_textarea(...$args);}
+{
+    echo html_textarea(...$args);
+}
 function e_html_select(...$args)
-{echo html_select(...$args);}
+{
+    echo html_select(...$args);
+}
 function e_html_button(...$args)
-{echo html_button(...$args);}
+{
+    echo html_button(...$args);
+}
 function e_html_br(...$args)
-{echo html_br(...$args);}
+{
+    echo html_br(...$args);
+}
 function e_html_hr(...$args)
-{echo html_hr(...$args);}
+{
+    echo html_hr(...$args);
+}
 function e_html_img(...$args)
-{echo html_img(...$args);}
+{
+    echo html_img(...$args);
+}
 function e_html_meta(...$args)
-{echo html_meta(...$args);}
+{
+    echo html_meta(...$args);
+}
 function e_html_link(...$args)
-{echo html_link(...$args);}
+{
+    echo html_link(...$args);
+}
 function e_html_script(...$args)
-{echo html_script(...$args);}
+{
+    echo html_script(...$args);
+}
 function e_html_style(...$args)
-{echo html_style(...$args);}
+{
+    echo html_style(...$args);
+}
 /*  */
 function e_pretty_html(...$args)
-{echo pretty_html(...$args);}
+{
+    echo pretty_html(...$args);
+}
 
 function e(...$parts)
 {
