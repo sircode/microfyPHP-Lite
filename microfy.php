@@ -700,11 +700,10 @@ function fail($msg = 'Error')
  * ──────────────────────────────────────────────────────────────────────────────
  */
 
-function slugify($string)
-{
-    $string = strtolower(trim($string));
-    $string = preg_replace('/[^a-z0-9]+/', '-', $string);
-    return trim($string, '-');
+function slugify($str) {
+    $str = iconv('UTF-8', 'ASCII//TRANSLIT//IGNORE', $str);
+    $str = preg_replace('/[^A-Za-z0-9]+/', '-', $str);
+    return strtolower(trim($str, '-'));
 }
 
 /**
@@ -1616,3 +1615,4 @@ function e(...$parts)
         echo $part;
     }
 }
+
