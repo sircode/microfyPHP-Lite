@@ -143,7 +143,7 @@ $data = db_all($pdo, 'SELECT * FROM users');
 ul(array_column($data, 'username'));
 ```
 
-## 🧪 [More Examples](https://itnb.com/microfyPHP-Lite/)
+## 🧪 [More Examples](https://itnb.com/microfyphp-lite/)
 
 ---
 
