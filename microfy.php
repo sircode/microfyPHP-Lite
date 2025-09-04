@@ -3,13 +3,16 @@
 /**
  * MicrofyPHP
  * microfy.php
- * v0.1.6
+ * v0.1.7
  * Author: SirCode
  */
 
 // paths optional
 // namespace Sircode\Microfy;
 // use DOMDocument;
+
+/* EXPERIMENTAL */
+
 
 /**
  * ──────────────────────────────────────────────────────────────────────────────
@@ -385,6 +388,81 @@ function debug_session()
     echo "</div>";
 }
 
+function fncs_before()
+{
+    // store snapshot in a global
+    $GLOBALS['__before'] = get_defined_functions()['user'];
+}
+
+function fncs_after($emit = false)
+{
+    $before = $GLOBALS['__before'];
+    $after  = get_defined_functions()['user'];
+    $newFuncs = array_diff($after, $before);
+
+    if ($emit) {
+
+        $docRoot = realpath($_SERVER['DOCUMENT_ROOT']); // normalize path
+        $result = [];
+
+        foreach ($newFuncs as $fn) {
+            try {
+                $ref      = new ReflectionFunction($fn);
+                $realName = $ref->getName(); // preserves original case
+                $file     = $ref->getFileName();
+
+                // shorten path if inside doc root
+                if ($docRoot && str_starts_with($file, $docRoot)) {
+                    $file = substr($file, strlen($docRoot));
+                }
+
+                $result[$realName] = $file . ':' . $ref->getStartLine();
+            } catch (ReflectionException $e) {
+                $result[$fn] = 'Unknown location';
+            }
+        }
+    } else {
+        $result = $newFuncs;
+    }
+
+    return $result;
+}
+
+
+
+function finfo($name)
+{
+    $ref = new ReflectionFunction($name);
+
+    $params = [];
+    foreach ($ref->getParameters() as $p) {
+        $str = '';
+
+        if ($p->hasType()) {
+            $str .= (string) $p->getType() . ' ';
+        }
+
+        $str .= '$' . $p->getName();
+
+        if ($p->isDefaultValueAvailable()) {
+            $str .= ' = ' . var_export($p->getDefaultValue(), true);
+        }
+
+        $params[] = $str;
+    }
+
+    pp([
+        'name'    => $ref->getName(),
+        'file'    => $ref->getFileName(),
+        'start'   => $ref->getStartLine(),
+        'end'     => $ref->getEndLine(),
+        'params'  => $params,
+        'returns' => $ref->hasReturnType() ? (string) $ref->getReturnType() : 'mixed',
+    ]);
+}
+
+
+
 /**
  * ──────────────────────────────────────────────────────────────────────────────
  *   env.php
@@ -603,7 +681,7 @@ function build_html_table(
  * ──────────────────────────────────────────────────────────────────────────────
  */
 
-function climb_dir(string $path = null, int $levels = 1): string
+function climb_dir(?string $path = null, int $levels = 1): string
 {
     // 1) Figure out the starting path
     if ($path === null) {
@@ -700,12 +778,12 @@ function fail($msg = 'Error')
  * ──────────────────────────────────────────────────────────────────────────────
  */
 
-function slugify($str) {
+function slugify($str)
+{
     $str = iconv('UTF-8', 'ASCII//TRANSLIT//IGNORE', $str);
     $str = preg_replace('/[^A-Za-z0-9]+/', '-', $str);
     return strtolower(trim($str, '-'));
 }
-
 /**
  * ──────────────────────────────────────────────────────────────────────────────
  *   style.php
@@ -1615,4 +1693,3 @@ function e(...$parts)
         echo $part;
     }
 }
-
